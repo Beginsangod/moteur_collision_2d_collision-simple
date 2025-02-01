@@ -2,6 +2,7 @@
 #ifdef FORMES_INCLUDED
 
 #include <iostream>
+#include "collision_check.h"
 
 // Ajout des contours a la grille pour avoir un rectangle
 void definirRectangle(char rectangle[5][6])
@@ -76,6 +77,99 @@ void definirCercle(char cercle[3][5])
             {
                 cercle[i][j] = ' ';
             }
+        }
+    }
+}
+
+//deplacement des formes dans la map
+void deplacement(int& rectx, int& recty, int& rdirx, int& rdiry,int& px, int& py, int& pdirx, int& pdiry,int& trix, int& triy, int& tdirx, int& tdiry,int& cerx, int& cery, int& cdirx, int& cdiry, char triangle[5][11], char cercle[3][5])
+{
+    // Calcul des positions futures
+    int future_rectx = rectx + rdirx;
+    int future_recty = recty + rdiry;
+    int future_trix = trix + tdirx;
+    int future_triy = triy + tdiry;
+    int future_cerx = cerx + cdirx;
+    int future_cery = cery + cdiry;
+    int future_px = px + pdirx;
+    int future_py = py + pdiry;
+
+    // Vérification des collisions pour chaque forme
+
+    // --- Rectangle ---
+    if (future_rectx <= 1 || future_rectx + RECT_HEIGHT >= 18)
+        rdirx = -rdirx;
+    if (future_recty <= 0 || future_recty + RECT_WIDTH >= 50)
+        rdiry = -rdiry;
+    else
+    {
+        // Vérifier les collisions avec les autres formes
+        if (collision_check(future_rectx, future_recty, trix, triy, cerx, cery, px, py, triangle, cercle))
+        {
+            rdirx = -rdirx;
+            rdiry = -rdiry;
+        }
+        else
+        {
+            rectx = future_rectx;
+            recty = future_recty;
+        }
+    }
+
+    // --- Triangle ---
+    if (future_trix <= 1 || future_trix + TRI_HEIGHT >= 19)
+        tdirx = -tdirx;
+    if (future_triy <= 0 || future_triy + TRI_WIDTH >= 49)
+        tdiry = -tdiry;
+    else
+    {
+        if (collision_check(rectx, recty, future_trix, future_triy, cerx, cery, px, py, triangle, cercle))
+        {
+            tdirx = -tdirx;
+            tdiry = -tdiry;
+        }
+        else
+        {
+            trix = future_trix;
+            triy = future_triy;
+        }
+    }
+
+    // --- Cercle ---
+    if (future_cerx <= 1 || future_cerx + CER_HEIGHT >= 19)
+        cdirx = -cdirx;
+    if (future_cery <= 0 || future_cery + CER_WIDTH >= 50)
+        cdiry = -cdiry;
+    else
+    {
+        if (collision_check(rectx, recty, trix, triy, future_cerx, future_cery, px, py, triangle, cercle))
+        {
+            cdirx = -cdirx;
+            cdiry = -cdiry;
+        }
+        else
+        {
+            cerx = future_cerx;
+            cery = future_cery;
+        }
+    }
+
+    // --- Point ---
+    if (future_px <= 0 || future_px >= 19)
+        pdirx = -pdirx;
+    if (future_py <= 0 || future_py >= 49)
+        pdiry = -pdiry;
+    else
+    {
+        if (collision_check(rectx, recty, trix, triy, cerx, cery, future_px, future_py, triangle, cercle))
+        {
+            pdirx = -pdirx;
+            pdiry = -pdiry;
+        }
+        else
+        {
+            px = future_px;
+            py = future_py;
         }
     }
 }
